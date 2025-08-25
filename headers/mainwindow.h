@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+class QTcpSocket;
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -17,7 +19,15 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void readFromServer();
+
 private:
     Ui::MainWindow *ui;
+
+    QTcpSocket* socket = nullptr;
+
+    int expectedSize = -1;
+    QByteArray buffer;
 };
 #endif // MAINWINDOW_H
