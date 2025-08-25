@@ -1,5 +1,8 @@
 #include "../headers/mainwindow.h"
 #include "ui_mainwindow.h"
+
+#include "../headers/alertwidget.h"
+
 #include <QTcpSocket>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -17,12 +20,17 @@ MainWindow::MainWindow(QWidget *parent)
     }
     qDebug() << "서버 접속 성공";
 
-    QObject::connect(&socket, &QTcpSocket::readyRead, readFromServer);
+    QObject::connect(socket, &QTcpSocket::readyRead, this, &MainWindow::readFromServer);
 
-    QObject::connect(&socket, &QTcpSocket::disconnected, [&]() {
+    QObject::connect(socket, &QTcpSocket::disconnected, [&]() {
         qDebug() << "서버 연결 끊김";
         // this->deleteLater();
     });
+
+    // test
+    addAlert_test();
+    addAlert_test();
+    addAlert_test();
 }
 
 MainWindow::~MainWindow()
@@ -51,4 +59,26 @@ void MainWindow::readFromServer()
         qDebug() << "가변 메시지 수신:" << msg;
         expectedSize = -1;
     }
+}
+
+void MainWindow::addAlert_test()
+{
+    QListWidgetItem *item = new QListWidgetItem(ui->alertList);
+
+    int maxWidth = ui->alertList->viewport()->width() - 20;
+
+    AlertWidget* newAlert = new AlertWidget(this);
+    newAlert->setMaximumWidth(maxWidth);
+
+    // QLabel 크기에 기반하여 위젯 크기 계산
+    newAlert->adjustSize();
+
+    // 아이템 크기 위젯 크기에 맞춤
+    item->setSizeHint(newAlert->sizeHint());
+
+    ui->alertList->addItem(item);
+    ui->alertList->setItemWidget(item, newAlert);
+
+    // 스크롤 맨 아래로
+    ui->alertList->scrollToBottom();
 }

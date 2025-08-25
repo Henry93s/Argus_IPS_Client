@@ -23,6 +23,8 @@ private slots:
     void readFromServer();
 
 private:
+    void addAlert_test();
+private:
     Ui::MainWindow *ui;
 
     QTcpSocket* socket = nullptr;
