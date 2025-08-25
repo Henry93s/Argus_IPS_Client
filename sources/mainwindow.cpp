@@ -17,21 +17,12 @@ MainWindow::MainWindow(QWidget *parent)
     }
     qDebug() << "서버 접속 성공";
 
-<<<<<<< HEAD
     QObject::connect(&socket, &QTcpSocket::readyRead, readFromServer);
 
     QObject::connect(&socket, &QTcpSocket::disconnected, [&]() {
         qDebug() << "서버 연결 끊김";
         // this->deleteLater();
     });
-=======
-    // QObject::connect(&socket, &QTcpSocket::readyRead, readFromServer);
-
-    // QObject::connect(&socket, &QTcpSocket::disconnected, [&]() {
-    //     qDebug() << "서버 연결 끊김";
-    //     this->deleteLater();
-    // });
->>>>>>> dev
 }
 
 MainWindow::~MainWindow()
