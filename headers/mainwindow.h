@@ -23,6 +23,7 @@ private slots:
     void readFromServer();
 
 private:
+    void initailize_ui();
     void addAlert_test();
 private:
     Ui::MainWindow *ui;
