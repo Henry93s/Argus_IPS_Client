@@ -9,6 +9,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    sources/sessionwidget.cpp \
     sources/alertdialog.cpp \
     sources/main.cpp \
     sources/mainwindow.cpp \
@@ -18,11 +19,13 @@ HEADERS += \
     headers/Alert.h \
     headers/alertdialog.h \
     headers/mainwindow.h \
-    headers/alertwidget.h
+    headers/alertwidget.h \
+    headers/sessionwidget.h
 
 FORMS += \
     forms/alertdialog.ui \
-    forms/mainwindow.ui
+    forms/mainwindow.ui \
+    forms/sessionwidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
