@@ -918,101 +918,11 @@
        <attribute name="title">
         <string>Session</string>
        </attribute>
-       <widget class="QToolBox" name="toolBox">
-        <property name="geometry">
-         <rect>
-          <x>20</x>
-          <y>10</y>
-          <width>1141</width>
-          <height>621</height>
-         </rect>
-        </property>
-        <property name="currentIndex">
-         <number>3</number>
-        </property>
-        <widget class="QWidget" name="page_3">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>1141</width>
-           <height>485</height>
-          </rect>
-         </property>
-         <attribute name="label">
-          <string>IPv4</string>
-         </attribute>
-         <widget class="QTableWidget" name="tableWidget">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>0</y>
-            <width>1081</width>
-            <height>461</height>
-           </rect>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="page_5">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>1141</width>
-           <height>485</height>
-          </rect>
-         </property>
-         <attribute name="label">
-          <string>TCP</string>
-         </attribute>
-         <widget class="QTableWidget" name="tableWidget_2">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>0</y>
-            <width>1081</width>
-            <height>461</height>
-           </rect>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="page_6">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>1141</width>
-           <height>485</height>
-          </rect>
-         </property>
-         <attribute name="label">
-          <string>UDP</string>
-         </attribute>
-         <widget class="QTableWidget" name="tableWidget_3">
-          <property name="geometry">
-           <rect>
-            <x>10</x>
-            <y>0</y>
-            <width>1081</width>
-            <height>461</height>
-           </rect>
-          </property>
-         </widget>
-        </widget>
-        <widget class="QWidget" name="page_4">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>1141</width>
-           <height>485</height>
-          </rect>
-         </property>
-         <attribute name="label">
-          <string>View State</string>
-         </attribute>
-        </widget>
-       </widget>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QWidget" name="widget_5" native="true"/>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>

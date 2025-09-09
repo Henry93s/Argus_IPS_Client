@@ -52,13 +52,14 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = sessionwidget.cpp \
+SOURCES       = ../../sources/sessionwidget.cpp \
 		../../sources/alertdialog.cpp \
 		../../sources/main.cpp \
 		../../sources/mainwindow.cpp \
 		../../sources/alertwidget.cpp moc_alertdialog.cpp \
 		moc_mainwindow.cpp \
-		moc_alertwidget.cpp
+		moc_alertwidget.cpp \
+		moc_sessionwidget.cpp
 OBJECTS       = sessionwidget.o \
 		alertdialog.o \
 		main.o \
@@ -66,7 +67,8 @@ OBJECTS       = sessionwidget.o \
 		alertwidget.o \
 		moc_alertdialog.o \
 		moc_mainwindow.o \
-		moc_alertwidget.o
+		moc_alertwidget.o \
+		moc_sessionwidget.o
 DIST          = ../../.gitignore \
 		../../headers/network/.gitdummy \
 		/Qt/6.9.1/macos/mkspecs/features/spec_pre.prf \
@@ -373,7 +375,7 @@ DIST          = ../../.gitignore \
 		../../headers/alertdialog.h \
 		../../headers/mainwindow.h \
 		../../headers/alertwidget.h \
-		sessionwidget.h sessionwidget.cpp \
+		../../headers/sessionwidget.h ../../sources/sessionwidget.cpp \
 		../../sources/alertdialog.cpp \
 		../../sources/main.cpp \
 		../../sources/mainwindow.cpp \
@@ -1037,9 +1039,9 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents ../../headers/Alert.h ../../headers/alertdialog.h ../../headers/mainwindow.h ../../headers/alertwidget.h sessionwidget.h $(DISTDIR)/
-	$(COPY_FILE) --parents sessionwidget.cpp ../../sources/alertdialog.cpp ../../sources/main.cpp ../../sources/mainwindow.cpp ../../sources/alertwidget.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../../forms/alertdialog.ui ../../forms/mainwindow.ui sessionwidget.ui $(DISTDIR)/
+	$(COPY_FILE) --parents ../../headers/Alert.h ../../headers/alertdialog.h ../../headers/mainwindow.h ../../headers/alertwidget.h ../../headers/sessionwidget.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../../sources/sessionwidget.cpp ../../sources/alertdialog.cpp ../../sources/main.cpp ../../sources/mainwindow.cpp ../../sources/alertwidget.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../../forms/alertdialog.ui ../../forms/mainwindow.ui ../../forms/sessionwidget.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -1068,9 +1070,9 @@ benchmark: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_alertdialog.cpp moc_mainwindow.cpp moc_alertwidget.cpp
+compiler_moc_header_make_all: moc_alertdialog.cpp moc_mainwindow.cpp moc_alertwidget.cpp moc_sessionwidget.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_alertdialog.cpp moc_mainwindow.cpp moc_alertwidget.cpp
+	-$(DEL_FILE) moc_alertdialog.cpp moc_mainwindow.cpp moc_alertwidget.cpp moc_sessionwidget.cpp
 moc_alertdialog.cpp: ../../headers/alertdialog.h \
 		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/QDialog \
 		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/qdialog.h \
@@ -1094,6 +1096,18 @@ moc_alertwidget.cpp: ../../headers/alertwidget.h \
 		../../../Qt/6.9.1/macos/libexec/moc
 	/Users/choehyeongu/Qt/6.9.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=201402L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=17 -D__clang_minor__=0 -D__clang_patchlevel__=0 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/choehyeongu/Qt/6.9.1/macos/mkspecs/macx-clang -I/Users/choehyeongu/finalProj_ -I/Users/choehyeongu/Qt/6.9.1/macos/lib/QtWidgets.framework/Headers -I/Users/choehyeongu/Qt/6.9.1/macos/lib/QtGui.framework/Headers -I/Users/choehyeongu/Qt/6.9.1/macos/lib/QtNetwork.framework/Headers -I/Users/choehyeongu/Qt/6.9.1/macos/lib/QtCore.framework/Headers -I. -I/Applications/Xcode-beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1 -I/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include -I/Applications/Xcode-beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include -I/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/Users/choehyeongu/Qt/6.9.1/macos/lib ../../headers/alertwidget.h -o moc_alertwidget.cpp
 
+moc_sessionwidget.cpp: ../../headers/sessionwidget.h \
+		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/QWidget \
+		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/qwidget.h \
+		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/QTableWidget \
+		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/qtablewidget.h \
+		../../../Qt/6.9.1/macos/lib/QtCore.framework/Headers/QHash \
+		../../../Qt/6.9.1/macos/lib/QtCore.framework/Headers/qhash.h \
+		../../../Qt/6.9.1/macos/lib/QtCore.framework/Headers/QString \
+		../../../Qt/6.9.1/macos/lib/QtCore.framework/Headers/qstring.h \
+		../../../Qt/6.9.1/macos/libexec/moc
+	/Users/choehyeongu/Qt/6.9.1/macos/libexec/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -D__APPLE_CC__ -D__cplusplus=201402L -D__APPLE_CC__=6000 -D__clang__ -D__clang_major__=17 -D__clang_minor__=0 -D__clang_patchlevel__=0 -D__GNUC__=4 -D__GNUC_MINOR__=2 -D__GNUC_PATCHLEVEL__=1 -I/Users/choehyeongu/Qt/6.9.1/macos/mkspecs/macx-clang -I/Users/choehyeongu/finalProj_ -I/Users/choehyeongu/Qt/6.9.1/macos/lib/QtWidgets.framework/Headers -I/Users/choehyeongu/Qt/6.9.1/macos/lib/QtGui.framework/Headers -I/Users/choehyeongu/Qt/6.9.1/macos/lib/QtNetwork.framework/Headers -I/Users/choehyeongu/Qt/6.9.1/macos/lib/QtCore.framework/Headers -I. -I/Applications/Xcode-beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include/c++/v1 -I/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include -I/Applications/Xcode-beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.5.sdk/usr/include -I/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -F/Users/choehyeongu/Qt/6.9.1/macos/lib ../../headers/sessionwidget.h -o moc_sessionwidget.cpp
+
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
 compiler_moc_source_make_all:
@@ -1109,9 +1123,9 @@ ui_mainwindow.h: ../../forms/mainwindow.ui \
 		../../../Qt/6.9.1/macos/libexec/uic
 	/Users/choehyeongu/Qt/6.9.1/macos/libexec/uic ../../forms/mainwindow.ui -o ui_mainwindow.h
 
-ui_sessionwidget.h: sessionwidget.ui \
+ui_sessionwidget.h: ../../forms/sessionwidget.ui \
 		../../../Qt/6.9.1/macos/libexec/uic
-	/Users/choehyeongu/Qt/6.9.1/macos/libexec/uic sessionwidget.ui -o ui_sessionwidget.h
+	/Users/choehyeongu/Qt/6.9.1/macos/libexec/uic ../../forms/sessionwidget.ui -o ui_sessionwidget.h
 
 compiler_rez_source_make_all:
 compiler_rez_source_clean:
@@ -1125,8 +1139,20 @@ compiler_clean: compiler_moc_header_clean compiler_uic_clean
 
 ####### Compile
 
-sessionwidget.o: sessionwidget.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sessionwidget.o sessionwidget.cpp
+sessionwidget.o: ../../sources/sessionwidget.cpp ../../headers/sessionwidget.h \
+		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/QWidget \
+		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/qwidget.h \
+		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/QTableWidget \
+		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/qtablewidget.h \
+		../../../Qt/6.9.1/macos/lib/QtCore.framework/Headers/QHash \
+		../../../Qt/6.9.1/macos/lib/QtCore.framework/Headers/qhash.h \
+		../../../Qt/6.9.1/macos/lib/QtCore.framework/Headers/QString \
+		../../../Qt/6.9.1/macos/lib/QtCore.framework/Headers/qstring.h \
+		ui_sessionwidget.h \
+		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/QHeaderView \
+		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/qheaderview.h \
+		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/QTableWidgetItem
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o sessionwidget.o ../../sources/sessionwidget.cpp
 
 alertdialog.o: ../../sources/alertdialog.cpp ../../Headers/alertdialog.h \
 		../../../Qt/6.9.1/macos/lib/QtWidgets.framework/Headers/QDialog \
@@ -1183,6 +1209,9 @@ moc_mainwindow.o: moc_mainwindow.cpp
 
 moc_alertwidget.o: moc_alertwidget.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_alertwidget.o moc_alertwidget.cpp
+
+moc_sessionwidget.o: moc_sessionwidget.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_sessionwidget.o moc_sessionwidget.cpp
 
 ####### Install
 

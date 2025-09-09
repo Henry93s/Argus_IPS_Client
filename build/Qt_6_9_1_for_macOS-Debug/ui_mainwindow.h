@@ -127,6 +127,8 @@ public:
     QSpacerItem *horizontalSpacer_8;
     QListWidget *AlertList;
     QWidget *SessionTab;
+    QGridLayout *gridLayout_4;
+    QWidget *widget_5;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -634,6 +636,13 @@ public:
         tabWidget->addTab(AlertTab, QString());
         SessionTab = new QWidget();
         SessionTab->setObjectName("SessionTab");
+        gridLayout_4 = new QGridLayout(SessionTab);
+        gridLayout_4->setObjectName("gridLayout_4");
+        widget_5 = new QWidget(SessionTab);
+        widget_5->setObjectName("widget_5");
+
+        gridLayout_4->addWidget(widget_5, 0, 0, 1, 1);
+
         tabWidget->addTab(SessionTab, QString());
 
         gridLayout->addWidget(tabWidget, 0, 0, 1, 1);

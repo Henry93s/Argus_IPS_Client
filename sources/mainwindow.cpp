@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include "../headers/alertwidget.h"
+#include "../headers/sessionwidget.h"
 
 #include <QTcpSocket>
 #include <QMenuBar>
@@ -11,6 +12,10 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ui->widget_5->setLayout(new QVBoxLayout);
+    ui->widget_5->layout()->setContentsMargins(0, 0, 0, 0);
+    ui->widget_5->layout()->addWidget(new SessionWidget(this));
 
     socket = new QTcpSocket(this);
     socket->connectToHost("192.168.2.29", 8085);
