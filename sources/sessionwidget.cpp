@@ -3,11 +3,17 @@
 #include <QHeaderView>
 #include <QTableWidgetItem>
 
+#include <QWebEngineView>
+#include <QVBoxLayout>
+#include <QUrl>
+// #include <QDebug>
+
 SessionWidget::SessionWidget(QWidget *parent)
     : QWidget(parent), ui(new Ui::SessionWidget)
 {
     ui->setupUi(this);
     initTable();
+    initViewState();
 }
 
 SessionWidget::~SessionWidget()
@@ -99,4 +105,24 @@ void SessionWidget::upsertSession(const QString& src, quint16 sport,
     inc(2, 1);         // Packets +1
     inc(3, bytes);     // Bytes +bytes
     if (dirAToB) inc(4, 1); else inc(5, 1);
+}
+
+// View State init container
+void SessionWidget::initViewState() {
+    QWidget* box=this->findChild<QWidget*>("widget");
+    if (!box) box=this->findChild<QWidget*>("viewStateBox");
+    if (!box) return;
+
+    // if do not have layout
+    QVBoxLayout* lay=qobject_cast<QVBoxLayout*>(box->layout());
+    if (!lay) {
+        lay=new QVBoxLayout(box);
+        lay->setContentsMargins(0,0,0,0);
+    }
+    // no duplication
+    if (!viewStateView) {
+        viewStateView=new QWebEngineView(box);
+        viewStateView->setUrl(QUrl(QStringLiteral("http://127.0.0.1:8086")));
+        lay->addWidget(viewStateView);
+    }
 }

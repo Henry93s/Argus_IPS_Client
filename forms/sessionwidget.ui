@@ -52,15 +52,15 @@
      <item row="1" column="0" colspan="3">
       <widget class="QToolBox" name="toolBox">
        <property name="currentIndex">
-        <number>1</number>
+        <number>3</number>
        </property>
        <widget class="QWidget" name="page_7">
         <property name="geometry">
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>1141</width>
-          <height>491</height>
+          <width>1147</width>
+          <height>509</height>
          </rect>
         </property>
         <attribute name="label">
@@ -71,7 +71,7 @@
           <rect>
            <x>10</x>
            <y>0</y>
-           <width>1081</width>
+           <width>1091</width>
            <height>461</height>
           </rect>
          </property>
@@ -82,8 +82,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>1141</width>
-          <height>491</height>
+          <width>1147</width>
+          <height>509</height>
          </rect>
         </property>
         <attribute name="label">
@@ -94,7 +94,7 @@
           <rect>
            <x>10</x>
            <y>0</y>
-           <width>1081</width>
+           <width>1091</width>
            <height>461</height>
           </rect>
          </property>
@@ -105,8 +105,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>1141</width>
-          <height>491</height>
+          <width>1147</width>
+          <height>509</height>
          </rect>
         </property>
         <attribute name="label">
@@ -117,7 +117,7 @@
           <rect>
            <x>10</x>
            <y>0</y>
-           <width>1081</width>
+           <width>1091</width>
            <height>461</height>
           </rect>
          </property>
@@ -128,13 +128,23 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>1141</width>
-          <height>491</height>
+          <width>1147</width>
+          <height>509</height>
          </rect>
         </property>
         <attribute name="label">
          <string>View State</string>
         </attribute>
+        <widget class="QWidget" name="widget" native="true">
+         <property name="geometry">
+          <rect>
+           <x>9</x>
+           <y>0</y>
+           <width>1091</width>
+           <height>491</height>
+          </rect>
+         </property>
+        </widget>
        </widget>
       </widget>
      </item>

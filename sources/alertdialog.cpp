@@ -1,4 +1,4 @@
-#include "../Headers/alertdialog.h"
+#include "../headers/alertdialog.h"
 #include "ui_alertdialog.h"
 
 alertDialog::alertDialog(QWidget *parent)

@@ -8,6 +8,7 @@
 
 namespace Ui { class SessionWidget; }
 
+class QWebEngineView;
 class SessionWidget : public QWidget
 {
     Q_OBJECT
@@ -47,6 +48,9 @@ private:
 
     // "TCP"/"UDP"/"ICMP" → 해당 TableWidget 반환
     QTableWidget* tableForProto(const QString& l4Proto) const;
+
+    void initViewState();
+    QWebEngineView* viewStateView=nullptr;
 };
 
 // Key 해시 (friend로 선언되어 있어야 템플릿 인스턴스 가능 타이밍 안전)
