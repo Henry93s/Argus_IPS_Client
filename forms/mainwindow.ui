@@ -279,34 +279,21 @@
             <widget class="QDateTimeEdit" name="dateTimeUntil"/>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox">
-             <item>
-              <property name="text">
-               <string>Action</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Accept</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Drop</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item>
             <widget class="QRadioButton" name="radioAlert">
              <property name="maximumSize">
               <size>
-               <width>60</width>
+               <width>70</width>
                <height>16777215</height>
               </size>
              </property>
              <property name="text">
-              <string>Alert</string>
+              <string>Accept</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+             <property name="autoExclusive">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
@@ -321,18 +308,11 @@
              <property name="text">
               <string>Drop</string>
              </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="radioReject">
-             <property name="maximumSize">
-              <size>
-               <width>70</width>
-               <height>16777215</height>
-              </size>
+             <property name="checked">
+              <bool>true</bool>
              </property>
-             <property name="text">
-              <string>Reject</string>
+             <property name="autoExclusive">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
