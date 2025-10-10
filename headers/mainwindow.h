@@ -2,6 +2,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QChart>
+#include <QLineSeries>
+#include "Alert.h"
 
 class QTcpSocket;
 
@@ -23,8 +26,13 @@ private slots:
     void readFromServer();
 
 private:
+    QChart *threatChart;
+    QLineSeries *threatSeries;
     void initailize_ui();
     void addAlert_test();
+    void updateThreatChart(int x, int y/*const std::vector<Alert> &alerts*/);
+    void initThreatChart();
+
 private:
     Ui::MainWindow *ui;
 
