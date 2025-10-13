@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     sources/alertdialog.cpp \
+    sources/cameraworker.cpp \
     sources/main.cpp \
     sources/mainwindow.cpp \
     sources/alertwidget.cpp
@@ -17,6 +18,7 @@ SOURCES += \
 HEADERS += \
     headers/Alert.h \
     headers/alertdialog.h \
+    headers/cameraworker.h \
     headers/mainwindow.h \
     headers/alertwidget.h
 

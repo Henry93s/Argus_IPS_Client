@@ -15,6 +15,9 @@
 #include <QtCharts/QValueAxis>
 #include <QTimer>
 #include <QDateTime>
+#include <QPixmap>
+#include <QListWidgetItem>
+#include <QMessageBox>
 
 // 시간대별 위협 차트 초기화
 void MainWindow::initThreatChart() {
@@ -102,6 +105,7 @@ void MainWindow::updateThreatChart(int x, int y) {
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , isSurveillanceMode(false)
 {
     ui->setupUi(this);
 
@@ -128,11 +132,32 @@ MainWindow::MainWindow(QWidget *parent)
         // this->deleteLater();
     });
 
-
+    // 스레드-워커 설정
+    cameraWorker = new CameraWorker();
+    cameraWorker->moveToThread(&cameraThread);
+    // 카메라 워커 스레드 토글 동작을 위해 주석 처리 1 - 스레드 종료는 메인윈도우가 닫힐 때 처리해야함
+    // connect(&cameraThread, &QThread::finished, cameraWorker, &QObject::deleteLater);
+    // startCameraProcessing 시그널의 인자가 변경되었으므로, connect도 맞춰서 수정
+    connect(this, &MainWindow::startCameraProcessing, cameraWorker, &CameraWorker::process);
+    // 카메라 워커 스레드 토글 동작을 위해 주석 처리 2 - 스레드 종료는 메인윈도우가 닫힐 때 처리해야함
+    // connect(cameraWorker, &CameraWorker::finished, &cameraThread, &QThread::quit, Qt::DirectConnection);
+    connect(cameraWorker, &CameraWorker::frameReady, this, &MainWindow::updateCameraView);
+    connect(cameraWorker, &CameraWorker::motionDetected, this, &MainWindow::addMotionLog);
+    connect(cameraWorker, &CameraWorker::cameraError, this, &MainWindow::onCameraError);
+    connect(cameraWorker, &CameraWorker::cameraConnected, this, &MainWindow::onCameraConnected);
+    connect(cameraWorker, &CameraWorker::cameraDisconnected, this, &MainWindow::onCameraDisconnected);
+    // 프로그램 종료 전까지 계속 실행
+    cameraThread.start();
 }
 
 MainWindow::~MainWindow()
 {
+    // 워커에게 먼저 중지 신호를 보냄
+    cameraWorker->stop();
+    // 스레드를 안전하게 종료
+    cameraThread.quit();
+    cameraThread.wait(); // 스레드가 완전히 끝날 때까지 대기
+
     delete ui;
 }
 
@@ -183,4 +208,80 @@ void MainWindow::addAlert_test()
     ui->AlertList->setMinimumHeight(40);
     // 스크롤 맨 아래로
     // ui->alertList->scrollToBottom();
+}
+
+// "감시 모드" 버튼 클릭 시 호출되는 슬롯
+void MainWindow::on_surveillanceButton_clicked()
+{
+    isSurveillanceMode = !isSurveillanceMode; // toggle
+
+    if (isSurveillanceMode) {
+        ui->surveillanceButton->setText("연결 중...");
+        ui->surveillanceButton->setEnabled(false);
+        // IP와 포트만 시그널로 전달
+        emit startCameraProcessing("192.168.2.98", 5088);
+    } else {
+        // 워커에게 중지 신호를 보냄
+        cameraWorker->stop();
+    }
+}
+
+void MainWindow::updateCameraView(const QImage &image)
+{
+    if (!ui->cameraViewLabel->isVisible()) return;
+    ui->cameraViewLabel->setPixmap(QPixmap::fromImage(image).scaled(
+        ui->cameraViewLabel->size(),
+        Qt::KeepAspectRatio,
+        Qt::SmoothTransformation));
+}
+
+void MainWindow::addMotionLog(const QString &timestamp)
+{
+    QString logMessage = QString("[%1] 움직임이 감지되었습니다.").arg(timestamp);
+    QListWidgetItem *item = new QListWidgetItem(logMessage);
+    item->setForeground(Qt::red);
+    ui->motionLogList->addItem(item);
+    ui->motionLogList->scrollToBottom();
+}
+
+// 카메라 관련 에러가 발생했을 때 호출되는 슬롯
+void MainWindow::onCameraError(const QString &errorString)
+{
+    QMessageBox::critical(this, "카메라 오류", errorString);
+    // 에러 발생 시 감시 모드 강제 해제
+    if (isSurveillanceMode) {
+        isSurveillanceMode = false;
+        ui->surveillanceButton->setText("감시 모드 시작");
+        ui->cameraViewLabel->clear();
+        ui->cameraViewLabel->setStyleSheet("background-color: black;");
+        ui->cameraViewLabel->setText("카메라 오류 발생");
+        ui->CamPowerLabel->setText("[Camera] : OFF");
+        ui->CameraStatusLabel->setText("[Camera Status] : 비정상 동작");
+    }
+    ui->CamPowerLabel->setText("[Camera] : OFF");
+    ui->CameraStatusLabel->setText("[Camera Status] : 비정상 동작");
+}
+
+void MainWindow::onCameraConnected()
+{
+    qDebug() << "카메라 서버 연결 성공";
+    ui->surveillanceButton->setText("감시 모드 해제");
+    ui->surveillanceButton->setEnabled(true);
+    ui->CamPowerLabel->setText("[Camera] : ON");
+    ui->CameraStatusLabel->setText("[Camera Status] : 정상 동작 중");
+    ui->CommandStatusIPLabel->setText("[Command Status(IP)] : 192.168.2.98");
+}
+
+void MainWindow::onCameraDisconnected()
+{
+    qDebug() << "카메라 서버 연결 종료";
+    isSurveillanceMode = false;
+    ui->surveillanceButton->setText("감시 모드 시작");
+    ui->cameraViewLabel->clear();
+    ui->surveillanceButton->setEnabled(true);
+    ui->cameraViewLabel->setStyleSheet("background-color: black;");
+    ui->cameraViewLabel->setText("카메라 연결 끊김");
+    ui->CamPowerLabel->setText("[Camera] : OFF");
+    ui->CameraStatusLabel->setText("[Camera Status] : 정상 동작 중");
+    ui->CommandStatusIPLabel->setText("[Command Status(IP)] : 192.168.2.98");
 }
