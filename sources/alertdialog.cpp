@@ -58,18 +58,19 @@ void alertDialog::initialize()
     ui->SrcIPPort->setText(Alert::GetIpStr(pointingAlert->srcIp) + QString(":") + QString::number(pointingAlert->srcPort));
     ui->DstIPPort->setText(Alert::GetIpStr(pointingAlert->dstIp) + QString(":") + QString::number(pointingAlert->dstPort));
 
-    switch(pointingAlert->pType)
-    {
-    case protocolType::TCP:
-        ui->Protocol->setText("TCP");
-        break;
-    case protocolType::UDP:
-        ui->Protocol->setText("UDP");
-        break;
-    case protocolType::HTTP:
-        ui->Protocol->setText("Http");
-        break;
-    }
+    // switch(pointingAlert->pType)
+    // {
+    // case protocolType::TCP:
+    //     ui->Protocol->setText("TCP");
+    //     break;
+    // case protocolType::UDP:
+    //     ui->Protocol->setText("UDP");
+    //     break;
+    // case protocolType::HTTP:
+    //     ui->Protocol->setText("Http");
+    //     break;
+    // }
+    ui->Protocol->setText(protocolNames[pointingAlert->pType]);
 
     connect(ui->tabBox, &QComboBox::currentTextChanged, this, &alertDialog::tabChanged);
 

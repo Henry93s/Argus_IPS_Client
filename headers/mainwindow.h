@@ -14,6 +14,11 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+enum RequestType
+{
+    ALERT = 1,
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -33,7 +38,8 @@ private slots:
 private:
     void initailize_ui();
     void addAlert_test();
-    void addAlert(const Alert& alert, int alertIndex);
+    void addAlert(const Alert& alert);
+    void addAlertWidget(const Alert& alert);
 
     void parse_alerts();
     void make_alerts_test();

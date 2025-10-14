@@ -60,18 +60,7 @@ AlertWidget::AlertWidget(const Alert &alert, int alertIndex, QWidget *parent) : 
     QString destIP = QString("%1.%2.%3.%4").arg(alert.dstIp[0]).arg(alert.dstIp[1]).arg(alert.dstIp[2]).arg(alert.dstIp[3]);
     labels[alertAttributeType::DestIP] = new QLabel(destIP);
 
-    switch(alert.pType){
-    case protocolType::TCP:
-        labels[alertAttributeType::Protocol] = new QLabel("TCP");
-        break;
-    case protocolType::UDP:
-        labels[alertAttributeType::Protocol] = new QLabel("UDP");
-        break;
-    case protocolType::HTTP:
-        labels[alertAttributeType::Protocol] = new QLabel("Http");
-        break;
-    }
-
+    labels[alertAttributeType::Protocol] = new QLabel(protocolNames[alert.pType]);
     labels[alertAttributeType::SrcPort] = new QLabel(QString::number(alert.srcPort));
     labels[alertAttributeType::DestPort] = new QLabel(QString::number(alert.dstPort));
 
@@ -84,6 +73,9 @@ AlertWidget::AlertWidget(const Alert &alert, int alertIndex, QWidget *parent) : 
         break;
     case severityType::Critical:
         labels[alertAttributeType::Severity] = new QLabel("Critical");
+        break;
+    default:
+        labels[alertAttributeType::Severity] =new QLabel("Unknown");
         break;
     }
 
@@ -115,18 +107,7 @@ AlertWidget::AlertWidget(Alert &&alert, int alertIndex, QWidget *parent) : alert
     QString destIP = QString("%1.%2.%3.%4").arg(alert.dstIp[0]).arg(alert.dstIp[1]).arg(alert.dstIp[2]).arg(alert.dstIp[3]);
     labels[alertAttributeType::DestIP] = new QLabel(destIP);
 
-    switch(alert.pType){
-    case protocolType::TCP:
-        labels[alertAttributeType::Protocol] = new QLabel("TCP");
-        break;
-    case protocolType::UDP:
-        labels[alertAttributeType::Protocol] = new QLabel("UDP");
-        break;
-    case protocolType::HTTP:
-        labels[alertAttributeType::Protocol] = new QLabel("Http");
-        break;
-    }
-
+    labels[alertAttributeType::Protocol] = new QLabel(protocolNames[alert.pType]);
     labels[alertAttributeType::SrcPort] = new QLabel(QString::number(alert.srcPort));
     labels[alertAttributeType::DestPort] = new QLabel(QString::number(alert.dstPort));
 

@@ -6,6 +6,8 @@
 
 #include <QTcpSocket>
 #include <QMenuBar>
+#include <QTimer>
+#include <QJsonObject>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -14,11 +16,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     socket = new QTcpSocket(this);
-    socket->connectToHost("192.168.2.29", 8085);
+    // socket->connectToHost("192.168.2.29", 8085);
+    socket->connectToHost("192.168.32.130", 8085);
 
     // // test
-    // addAlert_test();
-    make_alerts_test();
+    addAlert_test();
+    // make_alerts_test();
 
     initailize_ui();
 
@@ -36,6 +39,10 @@ MainWindow::MainWindow(QWidget *parent)
         qDebug() << "서버 연결 끊김";
         // this->deleteLater();
     });
+
+    // QTimer* timer = new QTimer(this);
+    // connect(timer, &QTimer::timeout, this, &MainWindow::updateTick);
+    // timer->start(16); // 16ms마다 실행 (약 60fps)
 }
 
 MainWindow::~MainWindow()
@@ -47,23 +54,63 @@ void MainWindow::readFromServer()
 {
     buffer.append(socket->readAll());
 
-    while (true) {
-        if (expectedSize == -1) {
-            if (buffer.size() < 4) break; // 길이 정보 아직 도착 안 함
-            QDataStream stream(buffer);
-            stream.setByteOrder(QDataStream::BigEndian);
-            stream >> expectedSize;
-            buffer.remove(0, 4);
-        }
+    // 2️⃣ JSON 파싱
+    QJsonParseError parseError;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(buffer, &parseError);
 
-        if (buffer.size() < expectedSize) break; // 데이터 다 안 옴
+    if (parseError.error == QJsonParseError::NoError && jsonDoc.isObject())
+    {
+        // 3️⃣ QJsonObject 추출
+        QJsonObject jsonObj = jsonDoc.object();
 
-        QByteArray msg = buffer.left(expectedSize);
-        buffer.remove(0, expectedSize);
+        Alert alert;
+        alert.dstIp[0] = jsonObj["dstIp0"].toInt();
+        alert.dstIp[1] = jsonObj["dstIp1"].toInt();
+        alert.dstIp[2] = jsonObj["dstIp2"].toInt();
+        alert.dstIp[3] = jsonObj["dstIp3"].toInt();
+        alert.dstPort = jsonObj["dstPort"].toInt();
+        alert.srcIp[0] = jsonObj["srcIp0"].toInt();
+        alert.srcIp[1] = jsonObj["srcIp1"].toInt();
+        alert.srcIp[2] = jsonObj["srcIp2"].toInt();
+        alert.srcIp[3] = jsonObj["srcIp3"].toInt();
+        alert.srcPort = jsonObj["srcPort"].toInt();
+        alert.pType = (protocolType)jsonObj["proto"].toInt();
+        alert.sType = (severityType)jsonObj["severity"].toInt();
+        alert.aType = actionType::Accept;
 
-        qDebug() << "가변 메시지 수신:" << msg;
-        expectedSize = -1;
+        QString timeStr = jsonObj["time"].toString();
+
+        alert.time = QDateTime::fromString(timeStr, "yyyy-MM-dd HH:mm:ss");
+
+        addAlert(alert);
+        addAlertWidget(alert);
     }
+    else
+    {
+        qWarning() << "JSON parse error:" << parseError.errorString();
+    }
+
+    buffer.clear();
+
+    socket->write("Success");
+
+    // while (true) {
+    //     if (expectedSize == -1) {
+    //         if (buffer.size() < 4) break; // 길이 정보 아직 도착 안 함
+    //         QDataStream stream(buffer);
+    //         stream.setByteOrder(QDataStream::BigEndian);
+    //         stream >> expectedSize;
+    //         buffer.remove(0, 4);
+    //     }
+
+    //     if (buffer.size() < expectedSize) break; // 데이터 다 안 옴
+
+    //     QByteArray msg = buffer.left(expectedSize);
+    //     buffer.remove(0, expectedSize);
+
+    //     qDebug() << "가변 메시지 수신:" << msg;
+    //     expectedSize = -1;
+    // }
 }
 
 void MainWindow::checkDateFilterFrom(Qt::CheckState state)
@@ -142,11 +189,16 @@ void MainWindow::addAlert_test()
     // ui->alertList->scrollToBottom();
 }
 
-void MainWindow::addAlert(const Alert &alert, int alertIndex)
+void MainWindow::addAlert(const Alert &alert)
+{
+    alerts.push_back(alert);
+}
+
+void MainWindow::addAlertWidget(const Alert &alert)
 {
     QListWidgetItem * item = new QListWidgetItem(ui->AlertList);
 
-    AlertWidget* newAlert = new AlertWidget(alert, alertIndex, this);
+    AlertWidget* newAlert = new AlertWidget(alert, (int)alerts.size(), this);
 
     item->setSizeHint(newAlert->sizeHint());
 
@@ -163,17 +215,17 @@ void MainWindow::parse_alerts()
 
 void MainWindow::make_alerts_test()
 {
-    // 시험용으로 쓰는 alert들 만들기. 위의 parse_alerts()를 임시 대체한다.
-    alerts.push_back(Alert{QDateTime(QDate(2025, 9, 8),QTime(9, 50, 30)), {192, 168, 2, 16}, {192, 168, 30, 14}, actionType::Accept, protocolType::TCP, 2600, 2500, severityType::Low});
-    alerts.push_back(Alert{QDateTime(QDate(2025, 9, 7),QTime(9, 45, 1)), {192, 168, 3, 1}, {192, 168, 1, 9}, actionType::Drop, protocolType::UDP, 20, 35, severityType::Critical});
-    alerts.push_back(Alert{QDateTime(QDate(2025, 9, 8),QTime(12, 01, 45)), {192, 168, 50, 9}, {192, 168, 32, 49}, actionType::Drop, protocolType::HTTP, 57, 42, severityType::High});
-    alerts.push_back(Alert{QDateTime(QDate(2025, 8, 29),QTime(0, 30, 22)), {192, 168, 62, 31}, {192, 168, 59, 97}, actionType::Drop, protocolType::TCP, 5, 98, severityType::High});
+    // // 시험용으로 쓰는 alert들 만들기. 위의 parse_alerts()를 임시 대체한다.
+    // alerts.push_back(Alert{QDateTime(QDate(2025, 9, 8),QTime(9, 50, 30)), {192, 168, 2, 16}, {192, 168, 30, 14}, actionType::Accept, protocolType::TCP, 2600, 2500, severityType::Low});
+    // alerts.push_back(Alert{QDateTime(QDate(2025, 9, 7),QTime(9, 45, 1)), {192, 168, 3, 1}, {192, 168, 1, 9}, actionType::Drop, protocolType::UDP, 20, 35, severityType::Critical});
+    // alerts.push_back(Alert{QDateTime(QDate(2025, 9, 8),QTime(12, 01, 45)), {192, 168, 50, 9}, {192, 168, 32, 49}, actionType::Drop, protocolType::HTTP, 57, 42, severityType::High});
+    // alerts.push_back(Alert{QDateTime(QDate(2025, 8, 29),QTime(0, 30, 22)), {192, 168, 62, 31}, {192, 168, 59, 97}, actionType::Drop, protocolType::TCP, 5, 98, severityType::High});
 
-    addAlert_test();
+    // addAlert_test();
 
-    sort_alerts();
+    // sort_alerts();
 
-    set_alertWidgets_withFilter();
+    // set_alertWidgets_withFilter();
 }
 
 void MainWindow::sort_alerts()
@@ -218,7 +270,7 @@ void MainWindow::set_alertWidgets_withFilter()
         else if(ui->ProtocolSelect->currentText() == "UDP" && perAlert.pType != protocolType::UDP){
             continue;
         }
-        else if(ui->ProtocolSelect->currentText() == "Http" && perAlert.pType != protocolType::HTTP){
+        else if(ui->ProtocolSelect->currentText() == "ICMP" && perAlert.pType != protocolType::ICMP){
             continue;
         }
         // Src ip 같지 않으면 continue. ip넣지 않으면 그냥 통과.
@@ -250,7 +302,8 @@ void MainWindow::set_alertWidgets_withFilter()
             continue;
         }
 
-        addAlert(perAlert, i);
+        // addAlert(perAlert);
+        addAlertWidget(perAlert);
 
         i++;
     }

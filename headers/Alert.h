@@ -19,15 +19,33 @@ enum actionType{
 };
 
 enum protocolType {
+    HOPOPT,
+    ICMP,
+    IGMP,
+    GGP,
+    IPv4,
+    ST,
     TCP,
+    CBT,
+    EGP,
+    IGP,
+    BBN_RCC_MON,
+    NVP_2,
+    PUP,
+    ARGUS,
+    EMCON,
+    XNET,
+    CHAOS,
     UDP,
-    HTTP
+    PROTOCOL_COUNT
 };
 
+extern std::array<QString, PROTOCOL_COUNT> protocolNames;
+
 enum severityType {
-    Low,
+    Critical = 1,
     High,
-    Critical
+    Low,
 };
 
 typedef struct alert{
