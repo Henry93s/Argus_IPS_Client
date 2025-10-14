@@ -386,7 +386,7 @@ void MainWindow::onCameraDisconnected()
     ui->CamPowerLabel->setText("[Camera] : OFF");
     ui->CameraStatusLabel->setText("[Camera Status] : 정상 동작 중");
     ui->CommandStatusIPLabel->setText("[Command Status(IP)] : 192.168.2.98");
-=======
+}
 void MainWindow::addAlert(const Alert &alert)
 {
     alerts.push_back(alert);
