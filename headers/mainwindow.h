@@ -1,10 +1,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "Alert.h"
+
 #include <QMainWindow>
 #include <QChart>
 #include <QLineSeries>
 #include "Alert.h"
+#include <QListWidgetItem>
 
 class QTcpSocket;
 
@@ -13,6 +16,11 @@ namespace Ui {
 class MainWindow;
 }
 QT_END_NAMESPACE
+
+enum RequestType
+{
+    ALERT = 1,
+};
 
 class MainWindow : public QMainWindow
 {
@@ -25,13 +33,30 @@ public:
 private slots:
     void readFromServer();
 
+    void checkDateFilterFrom(Qt::CheckState);
+    void checkDateFilterUntil(Qt::CheckState);
+
+    void onAlertItemDoubleClicked(QListWidgetItem *item);
+
 private:
     QChart *threatChart;
     QLineSeries *threatSeries;
     void initailize_ui();
     void addAlert_test();
+
     void updateThreatChart(int x, int y/*const std::vector<Alert> &alerts*/);
     void initThreatChart();
+
+    void addAlert(const Alert& alert);
+    void addAlertWidget(const Alert& alert);
+
+    void parse_alerts();
+    void make_alerts_test();
+
+    void sort_alerts();
+
+    void set_alertWidgets_withFilter();
+
 
 private:
     Ui::MainWindow *ui;
@@ -40,5 +65,9 @@ private:
 
     int expectedSize = -1;
     QByteArray buffer;
+
+    alertAttributeType sortType;
+
+    QVector<Alert> alerts;
 };
 #endif // MAINWINDOW_H
