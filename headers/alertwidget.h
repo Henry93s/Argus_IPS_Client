@@ -6,25 +6,15 @@
 
 #include "Alert.h"
 
-enum labelType {
-    Time,
-    SrcIP,
-    DestIP,
-    Protocol,
-    SrcPort,
-    DestPort,
-    Severity
-};
-
 class AlertWidget : public QWidget
 {
     Q_OBJECT
 public:
     explicit AlertWidget(QWidget *parent = nullptr);
     explicit AlertWidget(const QString (&labels)[Severity + 1], QWidget *parent = nullptr);
-    explicit AlertWidget(const Alert& alert, QWidget *parent = nullptr);
-    explicit AlertWidget(Alert&& alert, QWidget *parent = nullptr);
-
+    explicit AlertWidget(const Alert& alert, int alertIndex, QWidget *parent = nullptr);
+    explicit AlertWidget(Alert&& alert, int alertIndex, QWidget *parent = nullptr);
+    int GetAlertIndex() const { return alertIndex; }
 private:
     void adjustSizeToText() {
         // // 메시지 길이에 따라 라벨 크기 계산
@@ -38,6 +28,7 @@ private:
 
 private:
     QLabel* labels[Severity + 1];
+    int alertIndex = -1;
 signals:
 };
 
