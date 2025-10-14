@@ -6,7 +6,10 @@
 #include <QMainWindow>
 #include <QChart>
 #include <QLineSeries>
+#include <QImage>
+#include <QThread>
 #include "Alert.h"
+#include "cameraworker.h"
 #include <QListWidgetItem>
 
 class QTcpSocket;
@@ -32,6 +35,16 @@ public:
 
 private slots:
     void readFromServer();
+    void on_surveillanceButton_clicked();
+    void updateCameraView(const QImage &image);
+    void addMotionLog(const QString &timestamp);
+    void onCameraError(const QString &errorString);
+    void onCameraConnected();
+    void onCameraDisconnected();
+
+signals:
+    // Worker에게 작업을 시작하라고 보낼 시그널
+    void startCameraProcessing(const QString &host, quint16 port);
 
     void checkDateFilterFrom(Qt::CheckState);
     void checkDateFilterUntil(Qt::CheckState);
@@ -66,6 +79,9 @@ private:
     int expectedSize = -1;
     QByteArray buffer;
 
+    QThread cameraThread;
+    CameraWorker *cameraWorker;
+    bool isSurveillanceMode;
     alertAttributeType sortType;
 
     QVector<Alert> alerts;

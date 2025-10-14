@@ -17,6 +17,7 @@ SOURCES += \
     sources/rawpacket.cpp \
     sources/related.cpp \
     sources/alertdialog.cpp \
+    sources/cameraworker.cpp \
     sources/main.cpp \
     sources/mainwindow.cpp \
     sources/alertwidget.cpp
@@ -24,6 +25,7 @@ SOURCES += \
 HEADERS += \
     headers/Alert.h \
     headers/alertdialog.h \
+    headers/cameraworker.h \
     headers/http_dns.h \
     headers/mainwindow.h \
     headers/alertwidget.h \
