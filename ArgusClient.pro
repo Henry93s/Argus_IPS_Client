@@ -39,7 +39,6 @@ FORMS += \
     forms/alertdialog.ui \
     forms/http_dns.ui \
     forms/mainwindow.ui \
-    forms/alertdialog.ui \
     forms/notes.ui \
     forms/overview.ui \
     forms/payload.ui \

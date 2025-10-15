@@ -4,22 +4,25 @@
 #include "../headers/alertwidget.h"
 #include "../headers/alertdialog.h"
 
+#include <QtCharts/QBarSet>
+#include <QJsonDocument>
+#include <algorithm>
+#include <array>
 #include <QTcpSocket>
 #include <QMenuBar>
 // QtCharts
-#include <QtCharts>
 #include <QtCharts/QChartView>
-#include <QtCharts/QLineSeries>
 #include <QVBoxLayout>
 #include <QRandomGenerator>
 #include <QtCharts/QDateTimeAxis>
-#include <QtCharts/QValueAxis>
 #include <QTimer>
 #include <QDateTime>
 #include <QPixmap>
 #include <QListWidgetItem>
 #include <QMessageBox>
 #include <QJsonObject>
+#include <QFlags>
+
 
 // 시간대별 위협 차트 초기화
 void MainWindow::initThreatChart() {
@@ -61,39 +64,6 @@ void MainWindow::initThreatChart() {
 
     ui->ThreatBarChartGraphicsView->setChart(threatChart);
     ui->ThreatBarChartGraphicsView->setRenderHint(QPainter::Antialiasing);
-
-    // ---- 상태 관리용 변수 ----
-    int *cumulativeThreatCount = new int(0);  // 누적 위협 카운트 저장
-
-    // ---- 타이머로 1초마다 값 추가 ----
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, [=]() mutable {
-        QDateTime now = QDateTime::currentDateTime();
-
-        // 00:00:00 시점이면 누적값 리셋
-        if (now.time().hour() == 0 && now.time().minute() == 0 && now.time().second() == 0) {
-            *cumulativeThreatCount = 0;
-            threatSeries->clear();
-            axisY->setRange(0, 20); // 다시 초기화
-        }
-
-        // 랜덤 위협 발생 수 (누적에 더하기)
-        int newThreats = QRandomGenerator::global()->bounded(5, 15);
-        *cumulativeThreatCount += newThreats;
-
-        // Y축 동적 조정 (20 넘으면 자동 확장)
-        if (*cumulativeThreatCount > axisY->max()) {
-            axisY->setRange(0, *cumulativeThreatCount + 10); // 여유 있게 늘림
-        }
-
-        // 데이터 추가
-        qint64 x = now.toMSecsSinceEpoch();  // X값 (시간)
-        threatSeries->append(x, *cumulativeThreatCount);
-
-        // X축 범위 현재 시간 기준 30초만 보이도록
-        axisX->setRange(now.addSecs(-30), now);
-    });
-    timer->start(1000); // 1초마다 실행
 }
 
 // 시간대별 위협 차트 업데이트
@@ -113,7 +83,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     socket = new QTcpSocket(this);
     socket->connectToHost("192.168.2.98", 8085);
-    // socket->connectToHost("192.168.2.29", 8085);
     // socket->connectToHost("192.168.32.130", 8085);
 
     // // test
@@ -124,15 +93,21 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->AlertList, &QListWidget::itemDoubleClicked, this, &MainWindow::onAlertItemDoubleClicked);
 
-
-    // threat chart 초기화
-    initThreatChart();
-
     if (!socket->waitForConnected(3000)) {  // 최대 3초 대기
         qDebug() << "서버 접속 실패:" << socket->errorString();
         // return;
     }
     qDebug() << "서버 접속 성공";
+
+    // threat chart 초기화
+    initThreatChart();
+    initThreatTop5Chart();
+    initSrcIpTop5Chart();
+
+    // 5초마 대시보드 차트를 업데이트하는 타이머 설정
+    dashboardTimer = new QTimer(this);
+    connect(dashboardTimer, &QTimer::timeout, this, &MainWindow::updateDashboardCharts);
+    dashboardTimer->start(5000); // 1초 간격
 
     QObject::connect(socket, &QTcpSocket::readyRead, this, &MainWindow::readFromServer);
 
@@ -207,6 +182,10 @@ void MainWindow::readFromServer()
 
         addAlert(alert);
         addAlertWidget(alert);
+
+        threatData[alert.pType]++; // 프로토콜 타입별 카운트 증가
+        QString srcIP = Alert::GetIpStr2(alert.srcIp);
+        if(srcIP != "0.0.0.0") srcIpData[srcIP]++;
     }
     else
     {
@@ -504,5 +483,137 @@ void MainWindow::set_alertWidgets_withFilter()
         addAlertWidget(perAlert);
 
         i++;
+    }
+}
+
+// <침입탐지 위협 Top 5> 차트 초기화 함수
+void MainWindow::initThreatTop5Chart()
+{
+    threatTop5Series = new QHorizontalBarSeries();
+    threatTop5Chart = new QChart();
+    threatTop5Chart->addSeries(threatTop5Series);
+    threatTop5Chart->setTitle("침입탐지 위협 Top 5");
+    threatTop5Chart->setAnimationOptions(QChart::SeriesAnimations);
+    threatTop5Chart->legend()->hide();
+
+    threatAxisY = new QBarCategoryAxis();
+    threatTop5Chart->addAxis(threatAxisY, Qt::AlignLeft);
+    threatTop5Series->attachAxis(threatAxisY);
+
+    threatAxisX = new QValueAxis();
+    threatAxisX->setRange(0, 10);
+    threatTop5Chart->addAxis(threatAxisX, Qt::AlignBottom);
+    threatTop5Series->attachAxis(threatAxisX);
+
+    ui->threatTop5_widget->setChart(threatTop5Chart);
+    ui->threatTop5_widget->setRenderHint(QPainter::Antialiasing);
+}
+
+// <침입탐지 출발지 IP Top 5> 차트 초기화 함수
+void MainWindow::initSrcIpTop5Chart()
+{
+    srcIpTop5Series = new QHorizontalBarSeries();
+    srcIpTop5Chart = new QChart();
+    srcIpTop5Chart->addSeries(srcIpTop5Series);
+    srcIpTop5Chart->setTitle("침입탐지 출발지 IP Top 5");
+    srcIpTop5Chart->setAnimationOptions(QChart::SeriesAnimations);
+    srcIpTop5Chart->legend()->hide();
+
+    srcIpAxisY = new QBarCategoryAxis();
+    srcIpTop5Chart->addAxis(srcIpAxisY, Qt::AlignLeft);
+    srcIpTop5Series->attachAxis(srcIpAxisY);
+
+    srcIpAxisX = new QValueAxis();
+    srcIpAxisX->setRange(0, 10);
+    srcIpTop5Chart->addAxis(srcIpAxisX, Qt::AlignBottom);
+    srcIpTop5Series->attachAxis(srcIpAxisX);
+
+    ui->startIPTop5_widget->setChart(srcIpTop5Chart);
+    ui->startIPTop5_widget->setRenderHint(QPainter::Antialiasing);
+}
+
+// 5초마 모든 대시보드 차트를 업데이트하는 메인 슬롯
+void MainWindow::updateDashboardCharts()
+{
+    // --- 1. 실시간 위협 누적 차트 업데이트 ---
+    QDateTime now = QDateTime::currentDateTime();
+    qint64 x = now.toMSecsSinceEpoch();
+    int currentTotalAlerts = alerts.size(); // 현재까지 수신된 총 Alert 개수
+
+    threatSeries->append(x, currentTotalAlerts);
+
+    // X축 범위 조정 (최근 30초)
+    if (!threatChart->axes(Qt::Horizontal).isEmpty()) {
+        // QChart에서 수평 축(Horizontal Axis)을 가져와 QDateTimeAxis로 형변환
+        auto *axisX = qobject_cast<QDateTimeAxis*>(threatChart->axes(Qt::Horizontal).first());
+        if (axisX) {
+            axisX->setRange(now.addSecs(-30), now);
+        }
+    }
+
+    // Y축 범위 동적 조정
+    if (!threatChart->axes(Qt::Vertical).isEmpty()) {
+        // QChart에서 수직 축(Vertical Axis)을 가져와 QValueAxis로 형변환
+        auto *axisY = qobject_cast<QValueAxis*>(threatChart->axes(Qt::Vertical).first());
+        if (axisY && currentTotalAlerts > axisY->max()) {
+            // Y축의 최대값을 현재 누적 위협 건수보다 약간 크게 설정
+            axisY->setMax(currentTotalAlerts + currentTotalAlerts / 5 + 10);
+        }
+    }
+
+    // --- 2. 위협 Top 5 차트 업데이트 (프로토콜 기반) ---
+    QList<QPair<protocolType, int>> threatList;
+    for(auto it = threatData.constBegin(); it != threatData.constEnd(); ++it) {
+        threatList.append({it.key(), it.value()});
+    }
+    std::sort(threatList.begin(), threatList.end(), [](const auto& a, const auto& b) { return a.second > b.second; });
+
+    QBarSet *newThreatSet = new QBarSet("Count");
+    QStringList newThreatCategories;
+    int maxThreatCount = (threatList.isEmpty() ? 10 : threatList.first().second);
+    for (int i = 0; i < 5 && i < threatList.size(); ++i) {
+        *newThreatSet << threatList[i].second;
+        // protocolNames 배열을 사용하여 enum을 문자열로 변환
+        newThreatCategories.prepend(protocolNames[threatList[i].first]);
+    }
+    threatTop5Series->clear();
+    threatAxisY->clear();
+    threatTop5Series->append(newThreatSet);
+    threatAxisY->append(newThreatCategories);
+    threatAxisX->setMax(maxThreatCount + maxThreatCount/5 + 1);
+
+    // --- 3. 출발지 IP Top 5 차트 업데이트 ---
+    QList<QPair<QString, int>> srcIpList;
+    for(auto it = srcIpData.constBegin(); it != srcIpData.constEnd(); ++it) {
+        srcIpList.append({it.key(), it.value()});
+    }
+    std::sort(srcIpList.begin(), srcIpList.end(), [](const auto& a, const auto& b) { return a.second > b.second; });
+
+    QBarSet *newSrcIpSet = new QBarSet("Count");
+    QStringList newSrcIpCategories;
+    int maxIpCount = (srcIpList.isEmpty() ? 10 : srcIpList.first().second);
+    for (int i = 0; i < 5 && i < srcIpList.size(); ++i) {
+        *newSrcIpSet << srcIpList[i].second;
+        newSrcIpCategories.prepend(srcIpList[i].first);
+    }
+
+    srcIpTop5Series->clear();
+    srcIpTop5Series->append(newSrcIpSet);
+
+    // Y축(카테고리) 업데이트: Qt::AlignLeft -> Qt::Vertical
+    if (!srcIpTop5Chart->axes(Qt::Vertical).isEmpty()) {
+        auto *axisY = qobject_cast<QBarCategoryAxis*>(srcIpTop5Chart->axes(Qt::Vertical).first());
+        if (axisY) {
+            axisY->clear();
+            axisY->append(newSrcIpCategories);
+        }
+    }
+
+    // X축(값) 업데이트: Qt::AlignBottom -> Qt::Horizontal
+    if (!srcIpTop5Chart->axes(Qt::Horizontal).isEmpty()) {
+        auto *axisX = qobject_cast<QValueAxis*>(srcIpTop5Chart->axes(Qt::Horizontal).first());
+        if (axisX) {
+            axisX->setMax(maxIpCount + maxIpCount/5 + 1);
+        }
     }
 }
