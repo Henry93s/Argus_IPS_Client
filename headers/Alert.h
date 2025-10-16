@@ -61,6 +61,7 @@ typedef struct alert{
 
     static QString GetIpStr(const unsigned char ip[4]) { return QString::number(ip[0]) + QString(".") + QString::number(ip[1]) + QString(".") + QString::number(ip[1]) + QString(".")
                                          + QString::number(ip[2]) + QString(".") + QString::number(ip[3]);}
+    static QString GetIpStr2(const unsigned char ip[4]) { return QString::number(ip[0]) + QString(".") + QString::number(ip[1]) + QString(".") + QString::number(ip[2]) + QString(".") + QString::number(ip[3]);}
 } Alert;
 
 #endif // ALERT_H
