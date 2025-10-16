@@ -8,7 +8,7 @@
 #include <QLineSeries>
 #include <QImage>
 #include <QThread>
-#include "Alert.h"
+
 #include "cameraworker.h"
 #include <QListWidgetItem>
 
@@ -41,15 +41,15 @@ private slots:
     void onCameraError(const QString &errorString);
     void onCameraConnected();
     void onCameraDisconnected();
-
-signals:
-    // Worker에게 작업을 시작하라고 보낼 시그널
-    void startCameraProcessing(const QString &host, quint16 port);
-
     void checkDateFilterFrom(Qt::CheckState);
     void checkDateFilterUntil(Qt::CheckState);
 
     void onAlertItemDoubleClicked(QListWidgetItem *item);
+
+    void sort_alerts(alertAttributeType sortAttribute);
+signals:
+    // Worker에게 작업을 시작하라고 보낼 시그널
+    void startCameraProcessing(const QString &host, quint16 port);
 
 private:
     QChart *threatChart;
@@ -66,10 +66,7 @@ private:
     void parse_alerts();
     void make_alerts_test();
 
-    void sort_alerts();
-
     void set_alertWidgets_withFilter();
-
 
 private:
     Ui::MainWindow *ui;
@@ -85,5 +82,7 @@ private:
     alertAttributeType sortType;
 
     QVector<Alert> alerts;
+
+    bool sortAttributeOrder[alertAttributeType::END] = { false, false, false, false, false, false, false };
 };
 #endif // MAINWINDOW_H
