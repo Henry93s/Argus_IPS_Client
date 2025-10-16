@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     sources/Alert.cpp \
+    sources/alertwidgetitem.cpp \
     sources/http_dns.cpp \
     sources/notes.cpp \
     sources/overview.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
 HEADERS += \
     headers/Alert.h \
     headers/alertdialog.h \
+    headers/alertwidgetitem.h \
     headers/cameraworker.h \
     headers/http_dns.h \
     headers/mainwindow.h \

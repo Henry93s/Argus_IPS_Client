@@ -10,7 +10,8 @@ enum alertAttributeType {
     Protocol,
     SrcPort,
     DestPort,
-    Severity
+    Severity,
+    END
 };
 
 enum actionType{

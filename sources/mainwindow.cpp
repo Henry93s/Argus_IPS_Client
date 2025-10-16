@@ -22,7 +22,8 @@
 #include <QMessageBox>
 #include <QJsonObject>
 #include <QFlags>
-
+#include <algorithm>
+#include <functional>
 
 // 시간대별 위협 차트 초기화
 void MainWindow::initThreatChart() {
@@ -82,11 +83,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     socket = new QTcpSocket(this);
-    socket->connectToHost("192.168.2.98", 8085);
-    // socket->connectToHost("192.168.32.130", 8085);
+    // socket->connectToHost("192.168.2.98", 8085);
+    // socket->connectToHost("192.168.2.29", 8085);
+    socket->connectToHost("192.168.32.130", 8085);
 
     // // test
-    addAlert_test();
+    // addAlert_test();
     // make_alerts_test();
 
     initailize_ui();
@@ -268,6 +270,15 @@ void MainWindow::initailize_ui()
     connect(ui->ProtocolSelect, &QComboBox::currentIndexChanged, this, &MainWindow::set_alertWidgets_withFilter);
 
     connect(ui->SeveritySelect, &QComboBox::currentIndexChanged, this, &MainWindow::set_alertWidgets_withFilter);
+
+    // sort
+    connect(ui->TimeSort, &QPushButton::clicked, this, [this](){sort_alerts(alertAttributeType::Time);});
+    connect(ui->SourceIPSort, &QPushButton::clicked, this, [this](){sort_alerts(alertAttributeType::SrcIP);});
+    connect(ui->DestinationIPSort, &QPushButton::clicked, this, [this](){sort_alerts(alertAttributeType::DestIP);});
+    connect(ui->ProtocolSort, &QPushButton::clicked, this, [this](){sort_alerts(alertAttributeType::Protocol);});
+    connect(ui->SourcePortSort, &QPushButton::clicked, this, [this](){sort_alerts(alertAttributeType::SrcPort);});
+    connect(ui->DestinationPortSort, &QPushButton::clicked, this, [this](){sort_alerts(alertAttributeType::DestPort);});
+    connect(ui->SeveritySort, &QPushButton::clicked, this, [this](){sort_alerts(alertAttributeType::Severity);});
 }
 
 void MainWindow::addAlert_test()
@@ -405,15 +416,154 @@ void MainWindow::make_alerts_test()
     // set_alertWidgets_withFilter();
 }
 
-void MainWindow::sort_alerts()
+void MainWindow::sort_alerts(alertAttributeType sortAttribute)
 {
+    int ip1 = 0;
+    int ip2 = 0;
+    std::function<bool(const Alert& a1, const Alert& a2)> sortFunc;
 
+    sortAttributeOrder[sortAttribute] = !sortAttributeOrder[sortAttribute];
+
+    if(sortAttributeOrder[sortAttribute]){
+        switch(sortAttribute)
+        {
+            case alertAttributeType::SrcIP:
+                sortFunc = [](const Alert& a1, const Alert& a2){
+                    if(a1.srcIp[0] == a2.srcIp[0]){
+                        if(a1.srcIp[1] == a2.srcIp[1]){
+                            if(a1.srcIp[2] == a2.srcIp[2]){
+                                return a1.srcIp[3] < a2.srcIp[3];
+                            }
+                            return a1.srcIp[2] < a2.srcIp[2];
+                        }
+                        return a1.srcIp[1] < a2.srcIp[1];
+                    }
+                    return a1.srcIp[0] < a2.srcIp[0];
+                };
+                break;
+
+            case alertAttributeType::DestIP:
+                sortFunc = [](const Alert& a1, const Alert& a2){
+                    if(a1.dstIp[0] == a2.dstIp[0]){
+                        if(a1.dstIp[1] == a2.dstIp[1]){
+                            if(a1.dstIp[2] == a2.dstIp[2]){
+                                return a1.dstIp[3] < a2.dstIp[3];
+                            }
+                            return a1.dstIp[2] < a2.dstIp[2];
+                        }
+                        return a1.dstIp[1] < a2.dstIp[1];
+                    }
+                    return a1.dstIp[0] < a2.dstIp[0];
+                };
+                break;
+
+            case alertAttributeType::Protocol:
+                sortFunc = [](const Alert& a1, const Alert& a2){
+                    return a1.pType < a2.pType;
+                };
+                break;
+
+            case alertAttributeType::SrcPort:
+                sortFunc = [](const Alert& a1, const Alert& a2){
+                    return a1.srcPort < a2.srcPort;
+                };
+                break;
+
+            case alertAttributeType::DestPort:
+                sortFunc = [](const Alert& a1, const Alert& a2){
+                    return a1.dstPort < a2.dstPort;
+                };
+                break;
+
+            case alertAttributeType::Severity:
+                sortFunc = [](const Alert& a1, const Alert& a2){
+                    return a1.sType < a2.sType;
+                };
+                break;
+            default:
+                sortFunc = [](const Alert& a1, const Alert& a2){
+                    return a1.time < a2.time;
+                };
+                break;
+        }
+    }
+    else{
+        switch(sortAttribute)
+        {
+        case alertAttributeType::SrcIP:
+            sortFunc = [](const Alert& a1, const Alert& a2){
+                if(a1.srcIp[0] == a2.srcIp[0]){
+                    if(a1.srcIp[1] == a2.srcIp[1]){
+                        if(a1.srcIp[2] == a2.srcIp[2]){
+                            return a1.srcIp[3] > a2.srcIp[3];
+                        }
+                        return a1.srcIp[2] > a2.srcIp[2];
+                    }
+                    return a1.srcIp[1] > a2.srcIp[1];
+                }
+                return a1.srcIp[0] > a2.srcIp[0];
+            };
+            break;
+
+        case alertAttributeType::DestIP:
+            sortFunc = [](const Alert& a1, const Alert& a2){
+                if(a1.dstIp[0] == a2.dstIp[0]){
+                    if(a1.dstIp[1] == a2.dstIp[1]){
+                        if(a1.dstIp[2] == a2.dstIp[2]){
+                            return a1.dstIp[3] > a2.dstIp[3];
+                        }
+                        return a1.dstIp[2] > a2.dstIp[2];
+                    }
+                    return a1.dstIp[1] > a2.dstIp[1];
+                }
+                return a1.dstIp[0] > a2.dstIp[0];
+            };
+            break;
+
+        case alertAttributeType::Protocol:
+            sortFunc = [](const Alert& a1, const Alert& a2){
+                return a1.pType > a2.pType;
+            };
+            break;
+
+        case alertAttributeType::SrcPort:
+            sortFunc = [](const Alert& a1, const Alert& a2){
+                return a1.srcPort > a2.srcPort;
+            };
+            break;
+
+        case alertAttributeType::DestPort:
+            sortFunc = [](const Alert& a1, const Alert& a2){
+                return a1.dstPort > a2.dstPort;
+            };
+            break;
+
+        case alertAttributeType::Severity:
+            sortFunc = [](const Alert& a1, const Alert& a2){
+                return a1.sType > a2.sType;
+            };
+            break;
+        default:
+            sortFunc = [](const Alert& a1, const Alert& a2){
+                return a1.time > a2.time;
+            };
+            break;
+        }
+    }
+
+    std::sort(alerts.begin(), alerts.end(), sortFunc);
+
+    set_alertWidgets_withFilter();
 }
 
 void MainWindow::set_alertWidgets_withFilter()
 {
     ui->AlertList->clear();
-    addAlert_test();
+
+
+
+
+
 
     int i = 0;
     for(auto& perAlert : alerts){

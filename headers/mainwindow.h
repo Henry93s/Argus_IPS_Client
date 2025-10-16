@@ -48,15 +48,12 @@ private slots:
     void onCameraDisconnected();
     void checkDateFilterFrom(Qt::CheckState);
     void checkDateFilterUntil(Qt::CheckState);
-
     void onAlertItemDoubleClicked(QListWidgetItem *item);
     void updateDashboardCharts(); // 대시보드 차트를 주기적으로 업데이트할 슬롯
-
+    void sort_alerts(alertAttributeType sortAttribute);
 signals:
     // Worker에게 작업을 시작하라고 보낼 시그널
     void startCameraProcessing(const QString &host, quint16 port);
-
-
 
 private:
     void initailize_ui();
@@ -72,8 +69,6 @@ private:
 
     void parse_alerts();
     void make_alerts_test();
-
-    void sort_alerts();
 
     void set_alertWidgets_withFilter();
 
@@ -98,8 +93,6 @@ private:
     // 대시보드 업데이트 타이머
     QTimer *dashboardTimer;
 
-
-private:
     Ui::MainWindow *ui;
 
     QTcpSocket* socket = nullptr;
@@ -113,5 +106,7 @@ private:
     alertAttributeType sortType;
 
     QVector<Alert> alerts;
+
+    bool sortAttributeOrder[alertAttributeType::END] = { false, false, false, false, false, false, false };
 };
 #endif // MAINWINDOW_H
